@@ -1,13 +1,11 @@
-# 1) Build stage
 FROM node:18-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 COPY . .
-# Make sure your API URL in code points to the Cloud Run URL later (for local you can use localhost)
+# REACT_APP_API_URL is read during build (provided by cloudbuild.yaml)
 RUN npm run build
 
-# 2) Serve static files via nginx
 FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
 EXPOSE 80

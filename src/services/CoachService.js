@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 
-const API_URL = "https://coach-backend-419807603191.northamerica-northeast1.run.app/api/v1/coach";
+const API_URL = process.env.REACT_APP_API_URL ||"https://coach-backend-419807603191.northamerica-northeast1.run.app/api/v1/coach";
 
 class CoachService {
     getAllCoaches() {
