@@ -1,37 +1,30 @@
-# cloudbuild.yaml — FRONTEND (React + Nginx → Cloud Run)
-
 options:
   logging: CLOUD_LOGGING_ONLY
-  machineType: E2_HIGHCPU_8   # optional
+  machineType: E2_HIGHCPU_8
 
 substitutions:
   _REGION: northamerica-northeast1
   _REPOSITORY: coach-frontend-repo
   _SERVICE: coach-frontend
-  # Replace this AFTER backend deploys with your real backend URL:
   _API_URL: "https://coach-backend-REPLACE-ME.northamerica-northeast1.run.app/api/v1/coach"
-  _IMAGE: ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}
+  # ⬇️ hardcode your project id here
+  _IMAGE: northamerica-northeast1-docker.pkg.dev/gcp-class-16/coach-frontend-repo/coach-frontend
 
 steps:
-  # 1) Install deps cleanly
   - name: gcr.io/cloud-builders/npm
     args: ["ci"]
 
-  # 2) Build production assets (inject backend URL at build-time)
   - name: gcr.io/cloud-builders/npm
     env:
       - "REACT_APP_API_URL=${_API_URL}"
     args: ["run", "build"]
 
-  # 3) Build Docker image (Nginx)
-  - name: gcr.io/cloud-builders/docker
+  - name: gcr.io/cloud-builders/docker"
     args: ["build", "-t", "${_IMAGE}:$SHORT_SHA", "."]
 
-  # 4) Push image
   - name: gcr.io/cloud-builders/docker
     args: ["push", "${_IMAGE}:$SHORT_SHA"]
 
-  # 5) Deploy to Cloud Run (port 80)
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     entrypoint: gcloud
     args:
